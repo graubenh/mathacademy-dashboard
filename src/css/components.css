@@ -1,0 +1,442 @@
+/* Component Styles - Cards, tabs, charts, and interactive elements */
+
+/* Controls section */
+.controls {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 1000;
+}
+
+.time-period-selector {
+    display: flex;
+    align-items: center;
+}
+
+.period-select {
+    background: var(--card-light);
+    border: 1px solid var(--border-light);
+    backdrop-filter: blur(10px);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 4 5\"><path fill=\"%23666\" d=\"M2 0L0 2h4zm0 5L0 3h4z\"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 12px;
+    min-width: 120px;
+}
+
+body.dark-mode .period-select {
+    background: var(--card-dark);
+    border-color: var(--border-dark);
+    color: var(--text-dark);
+}
+
+.period-select:hover {
+    box-shadow: 0 2px 8px var(--shadow-light);
+}
+
+body.dark-mode .period-select:hover {
+    box-shadow: 0 2px 8px var(--shadow-dark);
+}
+
+/* Theme toggle */
+.theme-toggle {
+    background: var(--card-light);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+body.dark-mode .theme-toggle {
+    background: var(--card-dark);
+    border-color: var(--border-dark);
+    box-shadow: 0 4px 6px var(--shadow-dark);
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+body.dark-mode .theme-toggle:hover {
+    box-shadow: 0 6px 12px var(--shadow-dark);
+}
+
+/* Time period tabs */
+.time-period-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.tab {
+    padding: 0.75rem 2rem;
+    background: var(--card-light);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-light);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+body.dark-mode .tab {
+    background: var(--card-dark);
+    border-color: var(--border-dark);
+}
+
+.tab.active {
+    background: var(--gradient-primary);
+    color: white;
+    border-color: transparent;
+}
+
+.tab:hover:not(.active) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--shadow-light);
+}
+
+body.dark-mode .tab:hover:not(.active) {
+    box-shadow: 0 4px 8px var(--shadow-dark);
+}
+
+/* Current course card */
+.current-course-card {
+    background: var(--card-light);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 1px 4px var(--shadow-light);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    color: var(--text-light);
+    margin: 0 2rem 3rem;
+}
+
+body.dark-mode .current-course-card {
+    background: var(--card-dark);
+    border-color: var(--border-dark);
+    box-shadow: 0 2px 4px var(--shadow-dark);
+    color: var(--text-dark);
+}
+
+.current-course-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+body.dark-mode .current-course-card:hover {
+    box-shadow: 0 4px 8px var(--shadow-dark);
+}
+
+.course-name {
+    font-size: 2rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+    color: var(--accent-burgundy);
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+body.dark-mode .course-name {
+    color: var(--accent-burgundy-dark);
+}
+
+.course-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary-light);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body.dark-mode .course-label {
+    color: var(--text-secondary-dark);
+}
+
+/* Grid layouts */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+    padding: 0 2rem;
+}
+
+.activity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+    padding: 0 2rem;
+}
+
+/* Stat cards */
+.stat-card {
+    background: var(--card-light);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 4px var(--shadow-light);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    color: var(--text-light);
+}
+
+body.dark-mode .stat-card {
+    background: var(--card-dark);
+    box-shadow: 0 2px 4px var(--shadow-dark);
+    color: var(--text-dark);
+    border-color: var(--border-dark);
+}
+
+/* Additional stat card styling */
+.stat-card {
+    border: 1px solid var(--border-light);
+}
+
+/* Removed compact cards rule to maintain consistent alignment */
+
+.stat-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0rem;
+}
+
+.stat-chart {
+    height: 100px !important;
+    max-height: 100px;
+    width: 100% !important;
+    display: block;
+    margin: -5px -10px -10px -10px;
+}
+
+body.dark-mode .stat-card {
+    background: var(--card-dark);
+    border-color: var(--border-dark);
+    box-shadow: 0 4px 6px var(--shadow-dark);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .stat-card:hover {
+    box-shadow: 0 4px 24px var(--shadow-dark);
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary-light);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 0rem;
+    font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body.dark-mode .stat-label {
+    color: var(--text-secondary-dark);
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: var(--accent-burgundy);
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+body.dark-mode .stat-value {
+    color: var(--accent-burgundy-dark);
+}
+
+.stat-breakdown {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary-light);
+}
+
+body.dark-mode .stat-breakdown {
+    color: var(--text-secondary-dark);
+}
+
+.breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 0.5rem 0;
+    padding: 0.25rem 0;
+}
+
+/* Activity cards */
+.activity-card {
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 1px 4px var(--shadow-light);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    color: var(--text-light);
+}
+
+/* Activity cards with clean background */
+.activity-card {
+    background: var(--card-light);
+    border: 1px solid var(--border-light);
+}
+
+body.dark-mode .activity-card {
+    background: var(--card-dark);
+    border-color: var(--border-dark);
+    box-shadow: 0 2px 4px var(--shadow-dark);
+}
+
+.activity-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+body.dark-mode .activity-card:hover {
+    box-shadow: 0 4px 8px var(--shadow-dark);
+}
+
+.activity-count {
+    font-size: 2rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+    color: var(--accent-burgundy);
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+body.dark-mode .activity-count {
+    color: var(--accent-burgundy-dark);
+}
+
+.activity-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary-light);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body.dark-mode .activity-label {
+    color: var(--text-secondary-dark);
+}
+
+/* Daily chart */
+.daily-chart {
+    background: var(--card-light);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 2px 16px var(--shadow-light);
+    margin-top: 2rem;
+}
+
+.daily-chart canvas {
+    height: 300px !important;
+}
+
+body.dark-mode .daily-chart {
+    background: var(--card-dark);
+    border-color: var(--border-dark);
+    box-shadow: 0 4px 6px var(--shadow-dark);
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .current-course-card {
+        margin: 0 1rem 2rem;
+        padding: 1rem;
+    }
+    
+    .course-name {
+        font-size: 1.5rem;
+    }
+    
+    .theme-toggle {
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.25rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .time-period-tabs {
+        gap: 0.5rem;
+    }
+    
+    .tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .activity-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    
+    .stat-card, .activity-card {
+        padding: 1.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+    }
+    
+    .activity-count {
+        font-size: 1.5rem;
+    }
+    
+    .chart-bars {
+        height: 150px;
+        gap: 0.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .activity-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .activity-card {
+        padding: 1rem;
+    }
+    
+    .activity-count {
+        font-size: 1.25rem;
+    }
+    
+    .activity-label {
+        font-size: 0.8rem;
+    }
+}

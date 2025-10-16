@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathAcademy Progress Dashboard</title>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="src/css/main.css">
+    <link rel="stylesheet" href="src/css/components.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <!-- PDF.js for client-side PDF processing -->
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+</head>
+<body>
+    <!-- Controls -->
+    <div class="controls">
+        <button class="theme-toggle" id="theme-toggle">🌙</button>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>Gabriel's MathAcademy stats for <select id="time-period" class="period-select-inline">
+                <option value="all">all time</option>
+                <option value="week">this week</option>
+                <option value="today">today</option>
+            </select></h1>
+        </header>
+
+        <!-- Current course card -->
+        <div class="current-course-card">
+            <div class="course-label">Current Course</div>
+            <div class="course-name" id="current-course">Mathematical Foundations III</div>
+        </div>
+
+        <!-- Main statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-label">Total XP Earned</div>
+                    <div class="stat-value" id="total-xp">0</div>
+                </div>
+                <canvas class="stat-chart" id="total-xp-chart"></canvas>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-label">Total Activities</div>
+                    <div class="stat-value" id="total-activities">0</div>
+                </div>
+                <canvas class="stat-chart" id="total-activities-chart"></canvas>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-label">Average XP/Day</div>
+                    <div class="stat-value" id="avg-xp-day">0</div>
+                </div>
+                <canvas class="stat-chart" id="avg-xp-chart"></canvas>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-label">XP Attainment</div>
+                    <div class="stat-value" id="success-rate">0%</div>
+                </div>
+                <canvas class="stat-chart" id="success-rate-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Activity breakdown -->
+        <div class="activity-grid">
+            <div class="activity-card">
+                <div class="activity-count" id="lessons-count">0</div>
+                <div class="activity-label">Lessons</div>
+            </div>
+            <div class="activity-card">
+                <div class="activity-count" id="reviews-count">0</div>
+                <div class="activity-label">Reviews</div>
+            </div>
+            <div class="activity-card">
+                <div class="activity-count" id="multisteps-count">0</div>
+                <div class="activity-label">Multisteps</div>
+            </div>
+            <div class="activity-card">
+                <div class="activity-count" id="quizzes-count">0</div>
+                <div class="activity-label">Quizzes</div>
+            </div>
+            <div class="activity-card">
+                <div class="activity-count" id="diagnostics-count">0</div>
+                <div class="activity-label">Diagnostics</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript modules -->
+    <script src="src/js/pdf-parser.js"></script>
+    <script src="src/js/statistics.js"></script>
+    <script src="src/js/chart-helpers.js"></script>
+    <script src="src/js/ui.js"></script>
+    
+    <!-- Main application script -->
+    <script>
+        class MathAcademyDashboard {
+            constructor() {
+                this.parser = new PDFDataParser();
+                this.calculator = null;
+                this.ui = new UIController();
+            }
+
+            async init() {
+                try {
+                    this.ui.showLoading();
+                    
+                    // Load saved theme
+                    this.ui.loadTheme();
+                    
+                    // Parse data from source file
+                    const activities = await this.parser.loadFromFile();
+                    
+                    if (activities.length === 0) {
+                        throw new Error('No activity data found in PDF. Please check the browser console for detailed error messages. Ensure the PDF file is in the data/ directory and contains activity data.');
+                    }
+                    
+                    // Calculate statistics
+                    this.calculator = new StatisticsCalculator(activities);
+                    const stats = this.calculator.calculateStats();
+                    
+                    // Add calculator reference for period filtering
+                    stats.calculator = this.calculator;
+                    
+                    // Initialize UI
+                    this.ui.init(stats);
+                    this.ui.hideLoading();
+                    
+                } catch (error) {
+                    console.error('Failed to initialize dashboard:', error);
+                    this.ui.hideLoading();
+                    this.ui.showError(error.message);
+                }
+            }
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const dashboard = new MathAcademyDashboard();
+            dashboard.init();
+        });
+    </script>
+</body>
+</html>
