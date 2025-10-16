@@ -19,7 +19,7 @@ class PDFDataParser {
     async loadFromFile(filename = 'activity_log.pdf') {
         try {
             // Fetch the PDF file
-            const response = await fetch(`/data/${filename}`);
+            const response = await fetch(`/${filename}`);
             if (!response.ok) {
                 throw new Error(`Failed to load PDF: ${response.statusText}`);
             }
