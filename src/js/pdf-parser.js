@@ -16,7 +16,7 @@ class PDFDataParser {
     /**
      * Load and parse PDF file
      */
-    async loadFromFile(filename = 'math_academy_activity_log_gabriel_raubenheimer_10-16-2025.pdf') {
+    async loadFromFile(filename = 'activity_log.pdf') {
         try {
             // Fetch the PDF file
             const response = await fetch(`/data/${filename}`);
