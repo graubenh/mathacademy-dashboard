@@ -105,28 +105,6 @@ class UIController {
             if (canvas) canvas.style.display = 'block';
         });
 
-        // Debug logging for week view - gather all data
-        if (this.currentPeriod === 'week' && window.ChartHelpers) {
-            console.log('\n=== WEEK VIEW DATA (Last 7 Days) ===');
-
-            const cumulativeXP = ChartHelpers.getWeeklyCumulativeXPData(this.stats);
-            const dailyXP = ChartHelpers.getDailyXPData(this.stats);
-            const cumulativeActivities = ChartHelpers.getWeeklyCumulativeActivitiesData(this.stats);
-            const dailyActivities = ChartHelpers.getDailyActivitiesData(this.stats);
-            const dailyAttainment = ChartHelpers.getDailyAttainmentData(this.stats);
-
-            cumulativeXP.labels.forEach((date, i) => {
-                const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
-                console.log(`\n${dayName} (${date}):`);
-                console.log(`  Daily XP: ${dailyXP.values[i]}`);
-                console.log(`  Cumulative XP: ${cumulativeXP.values[i]}`);
-                console.log(`  Daily Activities: ${dailyActivities.values[i]}`);
-                console.log(`  Cumulative Activities: ${cumulativeActivities.values[i]}`);
-                console.log(`  XP Attainment: ${dailyAttainment.values[i]}%`);
-            });
-            console.log('\n=====================================\n');
-        }
-
         this.renderXPChart();
         this.renderActivitiesChart();
         this.renderAvgXPChart();
