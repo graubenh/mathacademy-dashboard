@@ -5,15 +5,25 @@
 
 class ChartHelpers {
     /**
+     * Convert a Date object to YYYY-MM-DD format in local timezone
+     */
+    static toLocalDateString(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    /**
      * Group activities by day
      */
     static groupActivitiesByDay(activities) {
         const dailyGroups = {};
-        
+
         activities.forEach(activity => {
-            // Use timestamp to get actual date, convert to YYYY-MM-DD format
+            // Use timestamp to get actual date, convert to YYYY-MM-DD format using local timezone
             const date = new Date(activity.timestamp);
-            const dateKey = date.toISOString().split('T')[0]; // Gets YYYY-MM-DD
+            const dateKey = ChartHelpers.toLocalDateString(date);
             
             if (!dailyGroups[dateKey]) {
                 dailyGroups[dateKey] = {
@@ -127,16 +137,16 @@ class ChartHelpers {
         const currentDate = new Date(firstDate);
         
         while (currentDate <= lastDate) {
-            const dateKey = currentDate.toISOString().split('T')[0];
+            const dateKey = ChartHelpers.toLocalDateString(currentDate);
             const dayXP = dailyXPLookup[dateKey] || 0; // 0 for days with no activities
             cumulativeXP += dayXP;
-            
+
             data.push({
                 date: dateKey,
                 cumulative: cumulativeXP
             });
-            
-            
+
+
             currentDate.setDate(currentDate.getDate() + 1);
         }
 
@@ -195,15 +205,15 @@ class ChartHelpers {
         const currentDate = new Date(firstDate);
         
         while (currentDate <= lastDate) {
-            const dateKey = currentDate.toISOString().split('T')[0];
+            const dateKey = ChartHelpers.toLocalDateString(currentDate);
             const dayCount = dailyCountLookup[dateKey] || 0; // 0 for days with no activities
             cumulativeCount += dayCount;
-            
+
             data.push({
                 date: dateKey,
                 cumulative: cumulativeCount
             });
-            
+
             currentDate.setDate(currentDate.getDate() + 1);
         }
         
@@ -333,6 +343,242 @@ class ChartHelpers {
     }
 
     /**
+     * Get daily XP data for week view (non-cumulative)
+     * Ensures all 7 days are included even if some have no activities
+     */
+    static getDailyXPData(stats) {
+        if (!stats.calculator || !stats.calculator.data) {
+            return { labels: [], values: [] };
+        }
+
+        const activities = stats.calculator.data
+            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        if (activities.length === 0) {
+            return { labels: [], values: [] };
+        }
+
+        const dailyData = ChartHelpers.groupActivitiesByDay(activities);
+
+        // Create lookup for daily XP
+        const dailyXPLookup = {};
+        dailyData.forEach(day => {
+            dailyXPLookup[day.date] = day.xp;
+        });
+
+        // Generate data for last 7 days (including days with no activities)
+        const today = new Date();
+        const labels = [];
+        const values = [];
+
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            const dateKey = ChartHelpers.toLocalDateString(date);
+
+            const dayXP = dailyXPLookup[dateKey] || 0;
+
+            labels.push(dateKey);
+            values.push(dayXP);
+        }
+
+        return {
+            labels: labels,
+            values: values
+        };
+    }
+
+    /**
+     * Get cumulative XP data for week view (cumulative within the week)
+     * Ensures all 7 days are included even if some have no activities
+     */
+    static getWeeklyCumulativeXPData(stats) {
+        if (!stats.calculator || !stats.calculator.data) {
+            return { labels: [], values: [] };
+        }
+
+        const activities = stats.calculator.data
+            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        if (activities.length === 0) {
+            return { labels: [], values: [] };
+        }
+
+        const dailyData = ChartHelpers.groupActivitiesByDay(activities);
+
+        // Create lookup for daily XP
+        const dailyXPLookup = {};
+        dailyData.forEach(day => {
+            dailyXPLookup[day.date] = day.xp;
+        });
+
+        // Generate data for last 7 days (including days with no activities)
+        const today = new Date();
+        const labels = [];
+        const values = [];
+        let cumulative = 0;
+
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            const dateKey = ChartHelpers.toLocalDateString(date);
+
+            const dayXP = dailyXPLookup[dateKey] || 0;
+            cumulative += dayXP;
+
+            labels.push(dateKey);
+            values.push(cumulative);
+        }
+
+        return {
+            labels: labels,
+            values: values
+        };
+    }
+
+    /**
+     * Get daily activity count for week view (non-cumulative)
+     * Ensures all 7 days are included even if some have no activities
+     */
+    static getDailyActivitiesData(stats) {
+        if (!stats.calculator || !stats.calculator.data) {
+            return { labels: [], values: [] };
+        }
+
+        const activities = stats.calculator.data
+            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        if (activities.length === 0) {
+            return { labels: [], values: [] };
+        }
+
+        const dailyData = ChartHelpers.groupActivitiesByDay(activities);
+
+        // Create lookup for daily activity count
+        const dailyCountLookup = {};
+        dailyData.forEach(day => {
+            dailyCountLookup[day.date] = day.count;
+        });
+
+        // Generate data for last 7 days (including days with no activities)
+        const today = new Date();
+        const labels = [];
+        const values = [];
+
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            const dateKey = ChartHelpers.toLocalDateString(date);
+
+            const dayCount = dailyCountLookup[dateKey] || 0;
+
+            labels.push(dateKey);
+            values.push(dayCount);
+        }
+
+        return {
+            labels: labels,
+            values: values
+        };
+    }
+
+    /**
+     * Get cumulative activities data for week view (cumulative within the week)
+     * Ensures all 7 days are included even if some have no activities
+     */
+    static getWeeklyCumulativeActivitiesData(stats) {
+        if (!stats.calculator || !stats.calculator.data) {
+            return { labels: [], values: [] };
+        }
+
+        const activities = stats.calculator.data
+            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        if (activities.length === 0) {
+            return { labels: [], values: [] };
+        }
+
+        const dailyData = ChartHelpers.groupActivitiesByDay(activities);
+
+        // Create lookup for daily activity count
+        const dailyCountLookup = {};
+        dailyData.forEach(day => {
+            dailyCountLookup[day.date] = day.count;
+        });
+
+        // Generate data for last 7 days (including days with no activities)
+        const today = new Date();
+        const labels = [];
+        const values = [];
+        let cumulative = 0;
+
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            const dateKey = ChartHelpers.toLocalDateString(date);
+
+            const dayCount = dailyCountLookup[dateKey] || 0;
+            cumulative += dayCount;
+
+            labels.push(dateKey);
+            values.push(cumulative);
+        }
+
+        return {
+            labels: labels,
+            values: values
+        };
+    }
+
+    /**
+     * Get daily attainment rate for week view
+     * For days with no activities, show 100% for visualization purposes only
+     * Ensures all 7 days are included
+     */
+    static getDailyAttainmentData(stats) {
+        if (!stats.calculator || !stats.calculator.data) {
+            return { labels: [], values: [] };
+        }
+
+        const activities = stats.calculator.data
+            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        if (activities.length === 0) {
+            return { labels: [], values: [] };
+        }
+
+        const dailyData = ChartHelpers.groupActivitiesByDay(activities);
+
+        // Create lookup for daily attainment
+        const dailyAttainmentLookup = {};
+        dailyData.forEach(day => {
+            if (day.totalPossible > 0) {
+                dailyAttainmentLookup[day.date] = Math.round((day.totalEarned / day.totalPossible) * 100);
+            }
+        });
+
+        // Generate data for last 7 days
+        const today = new Date();
+        const labels = [];
+        const values = [];
+
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            const dateKey = ChartHelpers.toLocalDateString(date);
+
+            labels.push(dateKey);
+            // For visualization: days with no activities show 100%
+            values.push(dailyAttainmentLookup[dateKey] !== undefined ? dailyAttainmentLookup[dateKey] : 100);
+        }
+
+        return {
+            labels: labels,
+            values: values
+        };
+    }
+
+    /**
      * Sample data points for chart performance
      */
     static sampleData(data, maxPoints) {
@@ -376,28 +622,37 @@ class ChartHelpers {
                     borderWidth: 2,
                     fill: true,
                     tension: 0.1,
-                    pointRadius: 0
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    pointHitRadius: 0
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: null
+                },
                 plugins: {
                     legend: { display: false },
                     tooltip: { enabled: false }
                 },
                 scales: {
-                    x: { 
+                    x: {
                         display: false,
                         grid: { display: false }
                     },
-                    y: { 
+                    y: {
                         display: false,
                         grid: { display: false }
                     }
                 },
                 elements: {
-                    point: { radius: 0 }
+                    point: {
+                        radius: 0,
+                        hoverRadius: 0,
+                        hitRadius: 0
+                    }
                 },
                 layout: {
                     padding: 0

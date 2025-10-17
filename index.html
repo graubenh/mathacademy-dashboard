@@ -3,24 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MathAcademy Progress Dashboard</title>
-    
+    <title>Gabriel's MathAcademy stats</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+
     <!-- Stylesheets -->
     <link rel="stylesheet" href="src/css/main.css">
     <link rel="stylesheet" href="src/css/components.css">
-    
+
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    
+
     <!-- PDF.js for client-side PDF processing -->
     <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 </head>
 <body>
-    <!-- Controls -->
-    <div class="controls">
+    <!-- Site header -->
+    <div class="site-header">
+        <a href="https://graubenh.substack.com" target="_blank" rel="noopener noreferrer" class="author-link">
+            <div class="author-info">
+                <img src="favicon.png" alt="" class="author-icon">
+                <span class="author-name">Gabriel Raubenheimer</span>
+            </div>
+        </a>
         <button class="theme-toggle" id="theme-toggle">🌙</button>
     </div>
-    
+
     <div class="container">
         <header>
             <h1>Gabriel's MathAcademy stats for <select id="time-period" class="period-select-inline">

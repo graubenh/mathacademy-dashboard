@@ -71,7 +71,7 @@ header {
 }
 
 h1 {
-    font-size: 2.8rem;
+    font-size: 2.4rem;
     font-weight: 400;
     letter-spacing: -0.02em;
     color: var(--text-light);
@@ -85,7 +85,7 @@ h1 {
     border: none;
     outline: none;
     appearance: none;
-    font-size: 2.8rem;
+    font-size: 2.4rem;
     font-weight: 400;
     font-family: inherit;
     letter-spacing: inherit;
@@ -169,10 +169,22 @@ body.dark-mode .error-message p {
 @media (max-width: 768px) {
     body {
         padding: 1rem;
+        padding-top: 2rem;
+    }
+
+    header {
+        margin-top: 2.5rem;
+        margin-bottom: 3rem;
     }
     
     h1 {
-        font-size: 2rem;
+        font-size: 1.6rem;
+        line-height: 1.3;
+    }
+
+    .period-select-inline {
+        font-size: 1.6rem;
+        line-height: 1.3;
     }
     
     .subtitle {

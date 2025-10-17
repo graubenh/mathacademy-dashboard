@@ -89,7 +89,7 @@ class UIController {
     renderInlineCharts() {
         // Clear label trackers for fresh render
         window.chartLabelTrackers = {};
-        
+
         if (this.currentPeriod === 'today') {
             // Hide all charts for today view
             ['total-xp-chart', 'total-activities-chart', 'avg-xp-chart', 'success-rate-chart'].forEach(id => {
@@ -98,13 +98,35 @@ class UIController {
             });
             return;
         }
-        
+
         // Show charts for other views
         ['total-xp-chart', 'total-activities-chart', 'avg-xp-chart', 'success-rate-chart'].forEach(id => {
             const canvas = document.getElementById(id);
             if (canvas) canvas.style.display = 'block';
         });
-        
+
+        // Debug logging for week view - gather all data
+        if (this.currentPeriod === 'week' && window.ChartHelpers) {
+            console.log('\n=== WEEK VIEW DATA (Last 7 Days) ===');
+
+            const cumulativeXP = ChartHelpers.getWeeklyCumulativeXPData(this.stats);
+            const dailyXP = ChartHelpers.getDailyXPData(this.stats);
+            const cumulativeActivities = ChartHelpers.getWeeklyCumulativeActivitiesData(this.stats);
+            const dailyActivities = ChartHelpers.getDailyActivitiesData(this.stats);
+            const dailyAttainment = ChartHelpers.getDailyAttainmentData(this.stats);
+
+            cumulativeXP.labels.forEach((date, i) => {
+                const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
+                console.log(`\n${dayName} (${date}):`);
+                console.log(`  Daily XP: ${dailyXP.values[i]}`);
+                console.log(`  Cumulative XP: ${cumulativeXP.values[i]}`);
+                console.log(`  Daily Activities: ${dailyActivities.values[i]}`);
+                console.log(`  Cumulative Activities: ${cumulativeActivities.values[i]}`);
+                console.log(`  XP Attainment: ${dailyAttainment.values[i]}%`);
+            });
+            console.log('\n=====================================\n');
+        }
+
         this.renderXPChart();
         this.renderActivitiesChart();
         this.renderAvgXPChart();
@@ -119,15 +141,18 @@ class UIController {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
-        
+
         // Destroy existing chart
         if (this.xpChart) {
             this.xpChart.destroy();
         }
 
-        // Get cumulative XP data
-        const cumulativeData = window.ChartHelpers ? ChartHelpers.getCumulativeXPData(this.stats) : { labels: [], values: [], transitions: {} };
-        
+        // Get data based on current period
+        const isWeekView = this.currentPeriod === 'week';
+        const cumulativeData = window.ChartHelpers ?
+            (isWeekView ? ChartHelpers.getWeeklyCumulativeXPData(this.stats) : ChartHelpers.getCumulativeXPData(this.stats))
+            : { labels: [], values: [], transitions: {} };
+
         // Find transition points for vertical lines
         const transitionLines = [];
         const transitionLabels = [];
@@ -155,9 +180,10 @@ class UIController {
                     backgroundColor: document.body.classList.contains('dark-mode') ? 'rgba(255, 107, 133, 0.2)' : 'rgba(76, 5, 25, 0.1)',
                     borderWidth: 2,
                     fill: true,
-                    tension: 0,
+                    tension: isWeekView ? 0.4 : 0,
                     pointRadius: 0,
-                    pointHoverRadius: 0
+                    pointHoverRadius: 0,
+                    pointBackgroundColor: document.body.classList.contains('dark-mode') ? '#ff6b85' : '#4c0519'
                 }]
             },
             plugins: [{
@@ -201,24 +227,7 @@ class UIController {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    tooltip: { 
-                        enabled: true,
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: document.body.classList.contains('dark-mode') ? 'rgba(40, 40, 40, 0.9)' : 'rgba(0, 0, 0, 0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        callbacks: {
-                            title: function(context) {
-                                const date = context[0].label;
-                                if (cumulativeData.transitions && cumulativeData.transitions[date]) {
-                                    const t = cumulativeData.transitions[date];
-                                    return `${date} - Course transition: ${t.from} → ${t.to}`;
-                                }
-                                return date;
-                            }
-                        }
-                    }
+                    tooltip: { enabled: false }
                 },
                 scales: {
                     x: { 
@@ -265,13 +274,19 @@ class UIController {
                             }
                         }
                     },
-                    y: { 
+                    y: {
                         display: true,
                         position: 'left',
                         grid: { display: false },
                         min: 0,
                         max: function(context) {
                             const max = Math.max(...context.chart.data.datasets[0].data);
+                            if (isWeekView) {
+                                // For week view, use more granular rounding
+                                if (max <= 100) return Math.ceil(max * 1.2 / 10) * 10;
+                                if (max <= 500) return Math.ceil(max * 1.2 / 50) * 50;
+                                return Math.ceil(max * 1.2 / 100) * 100;
+                            }
                             return Math.ceil(max * 1.1 / 1000) * 1000; // Round up to nearest 1000
                         },
                         ticks: {
@@ -304,12 +319,15 @@ class UIController {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
-        
+
         if (this.activitiesChart) {
             this.activitiesChart.destroy();
         }
 
-        const cumulativeData = window.ChartHelpers ? ChartHelpers.getCumulativeActivitiesData(this.stats) : { labels: [], values: [], transitions: {} };
+        const isWeekView = this.currentPeriod === 'week';
+        const cumulativeData = window.ChartHelpers ?
+            (isWeekView ? ChartHelpers.getWeeklyCumulativeActivitiesData(this.stats) : ChartHelpers.getCumulativeActivitiesData(this.stats))
+            : { labels: [], values: [], transitions: {} };
         
         // Find transition points for vertical lines
         const transitionLines = [];
@@ -337,8 +355,9 @@ class UIController {
                     backgroundColor: document.body.classList.contains('dark-mode') ? 'rgba(255, 107, 133, 0.2)' : 'rgba(76, 5, 25, 0.1)',
                     borderWidth: 2,
                     fill: true,
-                    tension: 0.4,
-                    pointRadius: 0
+                    tension: isWeekView ? 0.4 : 0.4,
+                    pointRadius: 0,
+                    pointBackgroundColor: document.body.classList.contains('dark-mode') ? '#ff6b85' : '#4c0519'
                 }]
             },
             plugins: [{
@@ -429,17 +448,23 @@ class UIController {
                             }
                         }
                     },
-                    y: { 
+                    y: {
                         display: true,
                         position: 'left',
                         grid: { display: false },
                         min: 0,
                         max: function(context) {
                             const max = Math.max(...context.chart.data.datasets[0].data);
+                            if (isWeekView) {
+                                // For week view, use more granular rounding
+                                if (max <= 20) return Math.ceil(max * 1.2 / 2) * 2;
+                                if (max <= 50) return Math.ceil(max * 1.2 / 5) * 5;
+                                return Math.ceil(max * 1.2 / 10) * 10;
+                            }
                             return Math.ceil(max * 1.1 / 100) * 100; // Round up to nearest 100
                         },
                         ticks: {
-                            color: '#7a7a7a',
+                            color: document.body.classList.contains('dark-mode') ? '#cccccc' : '#7a7a7a',
                             font: { size: 10, weight: '400' },
                             maxTicksLimit: 2
                         }
@@ -457,12 +482,15 @@ class UIController {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
-        
+
         if (this.avgXPChart) {
             this.avgXPChart.destroy();
         }
 
-        const avgData = window.ChartHelpers ? ChartHelpers.getAvgXPOverTimeData(this.stats) : { labels: [], values: [], transitions: {} };
+        const isWeekView = this.currentPeriod === 'week';
+        const avgData = window.ChartHelpers ?
+            (isWeekView ? ChartHelpers.getDailyXPData(this.stats) : ChartHelpers.getAvgXPOverTimeData(this.stats))
+            : { labels: [], values: [], transitions: {} };
         
         // Find transition points for vertical lines
         const transitionLines = [];
@@ -489,8 +517,9 @@ class UIController {
                     backgroundColor: document.body.classList.contains('dark-mode') ? 'rgba(255, 107, 133, 0.2)' : 'rgba(76, 5, 25, 0.1)',
                     borderWidth: 2,
                     fill: true,
-                    tension: 0.4,
-                    pointRadius: 0
+                    tension: isWeekView ? 0.4 : 0.4,
+                    pointRadius: 0,
+                    pointBackgroundColor: document.body.classList.contains('dark-mode') ? '#ff6b85' : '#4c0519'
                 }]
             },
             plugins: [{
@@ -581,20 +610,27 @@ class UIController {
                             }
                         }
                     },
-                    y: { 
+                    y: {
                         display: true,
                         position: 'left',
                         grid: { display: false },
                         min: function(context) {
+                            if (isWeekView) return 0;
                             const min = Math.min(...context.chart.data.datasets[0].data);
                             return Math.floor(min * 0.9 / 10) * 10; // Round down to nearest 10
                         },
                         max: function(context) {
                             const max = Math.max(...context.chart.data.datasets[0].data);
+                            if (isWeekView) {
+                                // For week view, use more granular rounding
+                                if (max <= 100) return Math.ceil(max * 1.2 / 10) * 10;
+                                if (max <= 500) return Math.ceil(max * 1.2 / 50) * 50;
+                                return Math.ceil(max * 1.2 / 100) * 100;
+                            }
                             return Math.ceil(max * 1.1 / 10) * 10; // Round up to nearest 10
                         },
                         ticks: {
-                            color: '#7a7a7a',
+                            color: document.body.classList.contains('dark-mode') ? '#cccccc' : '#7a7a7a',
                             font: { size: 10, weight: '400' },
                             maxTicksLimit: 2
                         }
@@ -612,12 +648,15 @@ class UIController {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
-        
+
         if (this.successChart) {
             this.successChart.destroy();
         }
 
-        const successData = window.ChartHelpers ? ChartHelpers.getSuccessRateOverTimeData(this.stats) : { labels: [], values: [], transitions: {} };
+        const isWeekView = this.currentPeriod === 'week';
+        const successData = window.ChartHelpers ?
+            (isWeekView ? ChartHelpers.getDailyAttainmentData(this.stats) : ChartHelpers.getSuccessRateOverTimeData(this.stats))
+            : { labels: [], values: [], transitions: {} };
         
         // Find transition points for vertical lines
         const transitionLines = [];
@@ -644,8 +683,9 @@ class UIController {
                     backgroundColor: document.body.classList.contains('dark-mode') ? 'rgba(255, 107, 133, 0.2)' : 'rgba(76, 5, 25, 0.1)',
                     borderWidth: 2,
                     fill: true,
-                    tension: 0.4,
-                    pointRadius: 0
+                    tension: isWeekView ? 0.4 : 0.4,
+                    pointRadius: 0,
+                    pointBackgroundColor: document.body.classList.contains('dark-mode') ? '#ff6b85' : '#4c0519'
                 }]
             },
             plugins: [{
@@ -736,20 +776,28 @@ class UIController {
                             }
                         }
                     },
-                    y: { 
+                    y: {
                         display: true,
                         position: 'left',
                         grid: { display: false },
                         min: function(context) {
+                            if (isWeekView) {
+                                const min = Math.min(...context.chart.data.datasets[0].data);
+                                return Math.max(0, Math.floor(min * 0.9 / 10) * 10);
+                            }
                             const min = Math.min(...context.chart.data.datasets[0].data);
                             return Math.floor(min * 0.9 / 10) * 10; // Round down to nearest 10
                         },
                         max: function(context) {
                             const max = Math.max(...context.chart.data.datasets[0].data);
+                            if (isWeekView) {
+                                // Allow values above 100%
+                                return Math.ceil(max * 1.1 / 10) * 10;
+                            }
                             return Math.ceil(max * 1.1 / 10) * 10; // Round up to nearest 10
                         },
                         ticks: {
-                            color: '#7a7a7a',
+                            color: document.body.classList.contains('dark-mode') ? '#cccccc' : '#7a7a7a',
                             font: { size: 10, weight: '400' },
                             maxTicksLimit: 2,
                             callback: function(value) {
