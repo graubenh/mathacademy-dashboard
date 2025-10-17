@@ -4,8 +4,9 @@
  */
 
 class StatisticsCalculator {
-    constructor(data = []) {
+    constructor(data = [], period = 'all') {
         this.data = data;
+        this.period = period;
     }
 
     /**
@@ -193,14 +194,33 @@ class StatisticsCalculator {
     }
 
     /**
-     * Calculate average XP per day
+     * Calculate average XP per day (calendar days, not just days with activities)
      */
     calculateAvgXPPerDay() {
-        const dailyStats = this.calculateDailyStats();
-        const uniqueDays = Object.keys(dailyStats).length;
+        if (!this.data || this.data.length === 0) {
+            return 0;
+        }
+
         const totalXP = this.calculateTotalXP();
-        
-        return uniqueDays > 0 ? Math.round(totalXP / uniqueDays) : 0;
+
+        // For week view, always use 7 days since it's a fixed 7-day period
+        if (this.period === 'week') {
+            return Math.round(totalXP / 7);
+        }
+
+        // For other periods, calculate based on actual date range
+        const dates = this.data.map(activity => new Date(activity.timestamp).getTime());
+        const firstDate = new Date(Math.min(...dates));
+        const lastDate = new Date(Math.max(...dates));
+
+        // Set to start of day for accurate day counting
+        firstDate.setHours(0, 0, 0, 0);
+        lastDate.setHours(0, 0, 0, 0);
+
+        // Calculate number of calendar days
+        const daysDiff = Math.floor((lastDate - firstDate) / (1000 * 60 * 60 * 24)) + 1;
+
+        return daysDiff > 0 ? Math.round(totalXP / daysDiff) : 0;
     }
 
     /**
@@ -369,7 +389,7 @@ class StatisticsCalculator {
                 break;
             case 'all':
             default:
-                return new StatisticsCalculator(this.data);
+                return new StatisticsCalculator(this.data, 'all');
         }
 
         const filteredData = this.data.filter(activity => {
@@ -377,7 +397,7 @@ class StatisticsCalculator {
             return activityDate >= startDate;
         });
 
-        return new StatisticsCalculator(filteredData);
+        return new StatisticsCalculator(filteredData, period);
     }
 
     /**
