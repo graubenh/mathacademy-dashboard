@@ -146,7 +146,6 @@ class UIController {
                 }
             });
         }
-        
 
         this.xpChart = new Chart(ctx, {
             type: 'line',
@@ -161,42 +160,71 @@ class UIController {
                     tension: isWeekView ? 0.4 : 0,
                     pointRadius: 0,
                     pointHoverRadius: 0,
-                    pointBackgroundColor: document.body.classList.contains('dark-mode') ? '#ff6b85' : '#4c0519'
+                    pointBackgroundColor: document.body.classList.contains('dark-mode') ? '#ff6b85' : '#4c0519',
+                    clip: false
                 }]
             },
             plugins: [{
                 id: 'transitionLines',
                 afterDraw: (chart) => {
                     if (transitionLines.length === 0) return;
-                    
+
                     const ctx = chart.ctx;
                     const yAxis = chart.scales.y;
                     const xAxis = chart.scales.x;
-                    
+
+                    // Disable clipping so labels can be drawn outside chart area
                     ctx.save();
+                    ctx.restore();
+                    ctx.save();
+
                     ctx.strokeStyle = document.body.classList.contains('dark-mode') ? 'rgba(255, 107, 133, 0.6)' : 'rgba(76, 5, 25, 0.3)';
                     ctx.lineWidth = 1;
                     ctx.setLineDash([5, 5]);
-                    
+
                     transitionLines.forEach(line => {
                         const x = xAxis.getPixelForValue(line.index);
-                        
+
                         // Draw vertical line
                         ctx.beginPath();
                         ctx.moveTo(x, yAxis.top);
                         ctx.lineTo(x, yAxis.bottom);
                         ctx.stroke();
-                        
-                        // Draw subtle label to the right of the line
+
+                        // Abbreviate course names for compact display
+                        // Must replace longer strings first to avoid partial matches
+                        const abbreviate = (courseName) => {
+                            return courseName
+                                .replace('Mathematical Foundations III', 'MFIII')
+                                .replace('Mathematical Foundations II', 'MFII')
+                                .replace('Mathematical Foundations I', 'MFI')
+                                .replace('Mathematics for Machine Learning', 'M4ML');
+                        };
+                        const labelText = `${abbreviate(line.transition.from)} → ${abbreviate(line.transition.to)}`;
+
+                        // Set label style
                         ctx.fillStyle = document.body.classList.contains('dark-mode') ? 'rgba(255, 107, 133, 1)' : 'rgba(76, 5, 25, 0.7)';
                         ctx.font = '10px system-ui';
-                        ctx.textAlign = 'left';
                         ctx.textBaseline = 'top';
-                        
-                        const labelText = `${line.transition.from.replace('Mathematical Foundations ', 'MF')} → ${line.transition.to.replace('Mathematical Foundations ', 'MF')}`;
-                        ctx.fillText(labelText, x + 5, yAxis.top);
+
+                        // Measure text width to determine if it fits on the right
+                        const textMetrics = ctx.measureText(labelText);
+                        const textWidth = textMetrics.width;
+                        const chartWidth = xAxis.right;
+                        const spaceOnRight = chartWidth - x - 5;
+
+                        // Position label on left or right depending on available space
+                        if (spaceOnRight < textWidth) {
+                            // Not enough space on right, put it on the left
+                            ctx.textAlign = 'right';
+                            ctx.fillText(labelText, x - 5, yAxis.top);
+                        } else {
+                            // Enough space on right
+                            ctx.textAlign = 'left';
+                            ctx.fillText(labelText, x + 5, yAxis.top);
+                        }
                     });
-                    
+
                     ctx.restore();
                 }
             }],
@@ -335,42 +363,71 @@ class UIController {
                     fill: true,
                     tension: isWeekView ? 0.4 : 0.4,
                     pointRadius: 0,
-                    pointBackgroundColor: document.body.classList.contains('dark-mode') ? '#ff6b85' : '#4c0519'
+                    pointBackgroundColor: document.body.classList.contains('dark-mode') ? '#ff6b85' : '#4c0519',
+                    clip: false
                 }]
             },
             plugins: [{
                 id: 'transitionLines',
                 afterDraw: (chart) => {
                     if (transitionLines.length === 0) return;
-                    
+
                     const ctx = chart.ctx;
                     const yAxis = chart.scales.y;
                     const xAxis = chart.scales.x;
-                    
+
+                    // Disable clipping so labels can be drawn outside chart area
                     ctx.save();
+                    ctx.restore();
+                    ctx.save();
+
                     ctx.strokeStyle = document.body.classList.contains('dark-mode') ? 'rgba(255, 107, 133, 0.6)' : 'rgba(76, 5, 25, 0.3)';
                     ctx.lineWidth = 1;
                     ctx.setLineDash([5, 5]);
-                    
+
                     transitionLines.forEach(line => {
                         const x = xAxis.getPixelForValue(line.index);
-                        
+
                         // Draw vertical line
                         ctx.beginPath();
                         ctx.moveTo(x, yAxis.top);
                         ctx.lineTo(x, yAxis.bottom);
                         ctx.stroke();
-                        
-                        // Draw subtle label to the right of the line
+
+                        // Abbreviate course names for compact display
+                        // Must replace longer strings first to avoid partial matches
+                        const abbreviate = (courseName) => {
+                            return courseName
+                                .replace('Mathematical Foundations III', 'MFIII')
+                                .replace('Mathematical Foundations II', 'MFII')
+                                .replace('Mathematical Foundations I', 'MFI')
+                                .replace('Mathematics for Machine Learning', 'M4ML');
+                        };
+                        const labelText = `${abbreviate(line.transition.from)} → ${abbreviate(line.transition.to)}`;
+
+                        // Set label style
                         ctx.fillStyle = document.body.classList.contains('dark-mode') ? 'rgba(255, 107, 133, 1)' : 'rgba(76, 5, 25, 0.7)';
                         ctx.font = '10px system-ui';
-                        ctx.textAlign = 'left';
                         ctx.textBaseline = 'top';
-                        
-                        const labelText = `${line.transition.from.replace('Mathematical Foundations ', 'MF')} → ${line.transition.to.replace('Mathematical Foundations ', 'MF')}`;
-                        ctx.fillText(labelText, x + 5, yAxis.top);
+
+                        // Measure text width to determine if it fits on the right
+                        const textMetrics = ctx.measureText(labelText);
+                        const textWidth = textMetrics.width;
+                        const chartWidth = xAxis.right;
+                        const spaceOnRight = chartWidth - x - 5;
+
+                        // Position label on left or right depending on available space
+                        if (spaceOnRight < textWidth) {
+                            // Not enough space on right, put it on the left
+                            ctx.textAlign = 'right';
+                            ctx.fillText(labelText, x - 5, yAxis.top);
+                        } else {
+                            // Enough space on right
+                            ctx.textAlign = 'left';
+                            ctx.fillText(labelText, x + 5, yAxis.top);
+                        }
                     });
-                    
+
                     ctx.restore();
                 }
             }],
@@ -504,35 +561,63 @@ class UIController {
                 id: 'transitionLines',
                 afterDraw: (chart) => {
                     if (transitionLines.length === 0) return;
-                    
+
                     const ctx = chart.ctx;
                     const yAxis = chart.scales.y;
                     const xAxis = chart.scales.x;
-                    
+
+                    // Disable clipping so labels can be drawn outside chart area
                     ctx.save();
+                    ctx.restore();
+                    ctx.save();
+
                     ctx.strokeStyle = document.body.classList.contains('dark-mode') ? 'rgba(255, 107, 133, 0.6)' : 'rgba(76, 5, 25, 0.3)';
                     ctx.lineWidth = 1;
                     ctx.setLineDash([5, 5]);
-                    
+
                     transitionLines.forEach(line => {
                         const x = xAxis.getPixelForValue(line.index);
-                        
+
                         // Draw vertical line
                         ctx.beginPath();
                         ctx.moveTo(x, yAxis.top);
                         ctx.lineTo(x, yAxis.bottom);
                         ctx.stroke();
-                        
-                        // Draw subtle label to the right of the line
+
+                        // Abbreviate course names for compact display
+                        // Must replace longer strings first to avoid partial matches
+                        const abbreviate = (courseName) => {
+                            return courseName
+                                .replace('Mathematical Foundations III', 'MFIII')
+                                .replace('Mathematical Foundations II', 'MFII')
+                                .replace('Mathematical Foundations I', 'MFI')
+                                .replace('Mathematics for Machine Learning', 'M4ML');
+                        };
+                        const labelText = `${abbreviate(line.transition.from)} → ${abbreviate(line.transition.to)}`;
+
+                        // Set label style
                         ctx.fillStyle = document.body.classList.contains('dark-mode') ? 'rgba(255, 107, 133, 1)' : 'rgba(76, 5, 25, 0.7)';
                         ctx.font = '10px system-ui';
-                        ctx.textAlign = 'left';
                         ctx.textBaseline = 'top';
-                        
-                        const labelText = `${line.transition.from.replace('Mathematical Foundations ', 'MF')} → ${line.transition.to.replace('Mathematical Foundations ', 'MF')}`;
-                        ctx.fillText(labelText, x + 5, yAxis.top);
+
+                        // Measure text width to determine if it fits on the right
+                        const textMetrics = ctx.measureText(labelText);
+                        const textWidth = textMetrics.width;
+                        const chartWidth = xAxis.right;
+                        const spaceOnRight = chartWidth - x - 5;
+
+                        // Position label on left or right depending on available space
+                        if (spaceOnRight < textWidth) {
+                            // Not enough space on right, put it on the left
+                            ctx.textAlign = 'right';
+                            ctx.fillText(labelText, x - 5, yAxis.top);
+                        } else {
+                            // Enough space on right
+                            ctx.textAlign = 'left';
+                            ctx.fillText(labelText, x + 5, yAxis.top);
+                        }
                     });
-                    
+
                     ctx.restore();
                 }
             }],
@@ -670,35 +755,63 @@ class UIController {
                 id: 'transitionLines',
                 afterDraw: (chart) => {
                     if (transitionLines.length === 0) return;
-                    
+
                     const ctx = chart.ctx;
                     const yAxis = chart.scales.y;
                     const xAxis = chart.scales.x;
-                    
+
+                    // Disable clipping so labels can be drawn outside chart area
                     ctx.save();
+                    ctx.restore();
+                    ctx.save();
+
                     ctx.strokeStyle = document.body.classList.contains('dark-mode') ? 'rgba(255, 107, 133, 0.6)' : 'rgba(76, 5, 25, 0.3)';
                     ctx.lineWidth = 1;
                     ctx.setLineDash([5, 5]);
-                    
+
                     transitionLines.forEach(line => {
                         const x = xAxis.getPixelForValue(line.index);
-                        
+
                         // Draw vertical line
                         ctx.beginPath();
                         ctx.moveTo(x, yAxis.top);
                         ctx.lineTo(x, yAxis.bottom);
                         ctx.stroke();
-                        
-                        // Draw subtle label to the right of the line
+
+                        // Abbreviate course names for compact display
+                        // Must replace longer strings first to avoid partial matches
+                        const abbreviate = (courseName) => {
+                            return courseName
+                                .replace('Mathematical Foundations III', 'MFIII')
+                                .replace('Mathematical Foundations II', 'MFII')
+                                .replace('Mathematical Foundations I', 'MFI')
+                                .replace('Mathematics for Machine Learning', 'M4ML');
+                        };
+                        const labelText = `${abbreviate(line.transition.from)} → ${abbreviate(line.transition.to)}`;
+
+                        // Set label style
                         ctx.fillStyle = document.body.classList.contains('dark-mode') ? 'rgba(255, 107, 133, 1)' : 'rgba(76, 5, 25, 0.7)';
                         ctx.font = '10px system-ui';
-                        ctx.textAlign = 'left';
                         ctx.textBaseline = 'top';
-                        
-                        const labelText = `${line.transition.from.replace('Mathematical Foundations ', 'MF')} → ${line.transition.to.replace('Mathematical Foundations ', 'MF')}`;
-                        ctx.fillText(labelText, x + 5, yAxis.top);
+
+                        // Measure text width to determine if it fits on the right
+                        const textMetrics = ctx.measureText(labelText);
+                        const textWidth = textMetrics.width;
+                        const chartWidth = xAxis.right;
+                        const spaceOnRight = chartWidth - x - 5;
+
+                        // Position label on left or right depending on available space
+                        if (spaceOnRight < textWidth) {
+                            // Not enough space on right, put it on the left
+                            ctx.textAlign = 'right';
+                            ctx.fillText(labelText, x - 5, yAxis.top);
+                        } else {
+                            // Enough space on right
+                            ctx.textAlign = 'left';
+                            ctx.fillText(labelText, x + 5, yAxis.top);
+                        }
                     });
-                    
+
                     ctx.restore();
                 }
             }],

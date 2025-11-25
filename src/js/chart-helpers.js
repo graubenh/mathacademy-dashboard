@@ -111,13 +111,17 @@ class ChartHelpers {
             };
         }
         
-        // Group by day 
+        // Group by day
         const dailyData = ChartHelpers.groupActivitiesByDay(activities);
-        
+
         // Create complete date range from first to last activity day
         const firstDate = new Date(dailyData[0].date);
         const lastDate = new Date(dailyData[dailyData.length - 1].date);
-        
+
+        // Normalize to start of day to avoid timezone issues
+        firstDate.setHours(0, 0, 0, 0);
+        lastDate.setHours(0, 0, 0, 0);
+
         // Create lookup for daily XP and transitions
         const dailyXPLookup = {};
         const transitionLookup = {};
@@ -130,12 +134,12 @@ class ChartHelpers {
                 };
             }
         });
-        
+
         // Generate cumulative data for ALL days (including zero-activity days)
         const data = [];
         let cumulativeXP = 0;
         const currentDate = new Date(firstDate);
-        
+
         while (currentDate <= lastDate) {
             const dateKey = ChartHelpers.toLocalDateString(currentDate);
             const dayXP = dailyXPLookup[dateKey] || 0; // 0 for days with no activities
@@ -145,7 +149,6 @@ class ChartHelpers {
                 date: dateKey,
                 cumulative: cumulativeXP
             });
-
 
             currentDate.setDate(currentDate.getDate() + 1);
         }
@@ -181,11 +184,15 @@ class ChartHelpers {
         
         // Group by day
         const dailyData = ChartHelpers.groupActivitiesByDay(activities);
-        
+
         // Create complete date range from first to last activity day
         const firstDate = new Date(dailyData[0].date);
         const lastDate = new Date(dailyData[dailyData.length - 1].date);
-        
+
+        // Normalize to start of day to avoid timezone issues
+        firstDate.setHours(0, 0, 0, 0);
+        lastDate.setHours(0, 0, 0, 0);
+
         // Create lookup for daily activity count and transitions
         const dailyCountLookup = {};
         const transitionLookup = {};

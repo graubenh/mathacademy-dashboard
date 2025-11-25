@@ -110,7 +110,8 @@ class PDFDataParser {
 
         // Look for Placement and Supplemental activities with their XP values
         // Handle format: "Mathematical Foundations III   Placement   63 /   XP"
-        const diagnosticRegex = /(Mathematical Foundations \w+)\s+(Placement|Supplemental)\s+(\d+)\s*\/\s*XP/g;
+        // Also handle: "Mathematics for Machine Learning   Placement   63 /   XP"
+        const diagnosticRegex = /(Mathematical Foundations \w+|Mathematics for Machine Learning)\s+(Placement|Supplemental)\s+(\d+)\s*\/\s*XP/g;
         let diagnosticMatch;
         const diagnosticActivities = [];
 
@@ -136,7 +137,8 @@ class PDFDataParser {
         }
 
         // Then parse other activities normally
-        const activityRegex = /(Mathematical Foundations \w+)\s+(Lesson|Review|Quiz|Diagnostic|Multistep)\s+(.*?)\s+(\d+)\s*\/\s*(\d+)\s*XP/g;
+        // Match both "Mathematical Foundations X" and "Mathematics for Machine Learning"
+        const activityRegex = /(Mathematical Foundations \w+|Mathematics for Machine Learning)\s+(Lesson|Review|Quiz|Diagnostic|Multistep)\s+(.*?)\s+(\d+)\s*\/\s*(\d+)\s*XP/g;
 
         let match;
         let matchCount = 0;
